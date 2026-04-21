@@ -89,6 +89,22 @@ The intended production flow is:
 
 For this project's current email/password setup, the mobile app should talk directly to Firebase Auth, usually via the Firebase SDK. The API is only responsible for verifying the resulting Firebase token.
 
+## Protected docs flow
+
+The `/docs` experience is hosted by the FastAPI application itself and served by the same Cloud Run service as the API.
+
+The page is a custom docs shell rather than FastAPI's built-in default docs page. Operationally it works as follows:
+
+1. The FastAPI app serves the custom docs HTML.
+2. The page can either:
+3. call `/auth/test/token` with Firebase test credentials when test auth helpers are enabled, or
+4. accept a manually pasted Firebase ID token.
+5. The page then requests `/openapi.json` with `Authorization: Bearer <id-token>`.
+6. The protected schema loads only if the token is valid and the caller satisfies `DOCS_REQUIRED_ROLE`.
+7. Swagger "Try it out" requests reuse that same bearer token for API calls.
+
+This means the docs UI is not separately hosted and does not have a separate auth system. It is part of the API service and relies on the same Firebase token flow as the protected endpoints.
+
 ## GitHub CI/CD configuration model
 
 GitHub Actions should use repository variables for non-sensitive configuration:

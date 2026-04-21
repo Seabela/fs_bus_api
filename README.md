@@ -69,8 +69,11 @@ The script will:
 
 Interactive docs shell: <http://127.0.0.1:8000/docs>
 
-The docs shell prompts for a Firebase ID token and uses that same bearer token
-to fetch the protected OpenAPI schema and authorize "Try it out" requests.
+The docs shell is served by the FastAPI app itself. It can either:
+- call the temporary `/auth/test/token` endpoint with Firebase test credentials
+- or accept a manually pasted Firebase ID token
+
+It then uses that same bearer token to fetch the protected OpenAPI schema and authorize "Try it out" requests.
 
 ### 3b — Docker Compose stack
 
@@ -93,7 +96,7 @@ Firebase Authentication is now the identity provider for API bearer-token valida
 - `/auth/test/whoami` and `/me` are the simplest endpoints to validate that a Firebase ID token is being accepted by the API.
 - `/auth/test/token` is a temporary backend proxy that exchanges email/password for a Firebase ID token for smoke testing only.
 - `/openapi.json` is protected by the same bearer-token flow and defaults to `Admin` access via `DOCS_REQUIRED_ROLE`.
-- `/docs` is a token-entry shell that uses the same Firebase ID token to fetch `/openapi.json` and authorize Swagger requests.
+- `/docs` is a custom FastAPI-served shell that can sign in through `/auth/test/token` for testing or accept a pasted Firebase ID token, then fetch `/openapi.json` and authorize Swagger requests.
 
 Direct Firebase sign-in endpoint used by clients:
 

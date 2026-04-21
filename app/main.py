@@ -4,6 +4,9 @@ FS Bus API — main application entry-point.
 
 from __future__ import annotations
 
+from functools import lru_cache
+from html import escape
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
@@ -60,6 +63,7 @@ app.add_middleware(
 from fastapi.security import OAuth2PasswordRequestForm
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
+DOCS_TEMPLATE_PATH = Path(__file__).with_name("templates") / "docs.html"
 
 
 def _serialize_user(current_user: TokenData) -> dict[str, object]:
@@ -87,141 +91,29 @@ def _require_docs_user(
     return current_user
 
 
+@lru_cache
+def _load_docs_template() -> str:
+    return DOCS_TEMPLATE_PATH.read_text(encoding="utf-8")
+
+
 def _build_docs_html(settings: Settings) -> str:
-    required_role = settings.docs_required_role or "any authenticated user"
-    return f"""
-<!DOCTYPE html>
-<html lang=\"en\">
-<head>
-    <meta charset=\"UTF-8\" />
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
-    <title>{app.title} Docs</title>
-    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css\" />
-    <style>
-        body {{
-            margin: 0;
-            font-family: "Segoe UI", sans-serif;
-            background: linear-gradient(135deg, #f3f7f4, #dce9df);
-            color: #17301f;
-        }}
-        .docs-shell {{
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 24px;
-        }}
-        .gate {{
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid #b7cabd;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 14px 30px rgba(23, 48, 31, 0.08);
-            margin-bottom: 20px;
-        }}
-        .gate h1 {{
-            margin-top: 0;
-            font-size: 1.7rem;
-        }}
-        .gate p {{
-            margin: 0 0 12px;
-            line-height: 1.5;
-        }}
-        .gate label {{
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }}
-        .gate textarea {{
-            width: 100%;
-            min-height: 110px;
-            border-radius: 12px;
-            border: 1px solid #8ea795;
-            padding: 12px;
-            font: inherit;
-            box-sizing: border-box;
-        }}
-        .gate button {{
-            margin-top: 12px;
-            border: 0;
-            border-radius: 999px;
-            padding: 12px 18px;
-            background: #17301f;
-            color: #fff;
-            font: inherit;
-            cursor: pointer;
-        }}
-        .gate code {{
-            background: #eef4ef;
-            padding: 2px 6px;
-            border-radius: 6px;
-        }}
-        #status {{
-            margin-top: 10px;
-            min-height: 24px;
-            font-weight: 600;
-        }}
-    </style>
-</head>
-<body>
-    <div class=\"docs-shell\">
-        <section class=\"gate\">
-            <h1>{app.title} API Docs</h1>
-            <p>OpenAPI access is protected by the same Firebase bearer-token flow as the API.</p>
-            <p>Minimum role: <code>{required_role}</code>.</p>
-            <label for=\"token\">Firebase ID token</label>
-            <textarea id=\"token\" placeholder=\"Paste a Firebase ID token here\"></textarea>
-            <button id=\"load-docs\" type=\"button\">Load Protected Docs</button>
-            <div id=\"status\"></div>
-        </section>
-        <div id=\"swagger-ui\"></div>
-    </div>
-    <script src=\"https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js\"></script>
-    <script>
-        const tokenInput = document.getElementById('token');
-        const statusNode = document.getElementById('status');
-        const loadButton = document.getElementById('load-docs');
-
-        async function loadDocs() {{
-            const token = tokenInput.value.trim();
-            if (!token) {{
-                statusNode.textContent = 'A Firebase ID token is required.';
-                return;
-            }}
-
-            statusNode.textContent = 'Loading protected OpenAPI schema...';
-            const response = await fetch('/openapi.json', {{
-                headers: {{ Authorization: `Bearer ${{token}}` }},
-            }});
-
-            if (!response.ok) {{
-                const body = await response.text();
-                statusNode.textContent = `Schema request failed: ${{response.status}} ${{body}}`;
-                return;
-            }}
-
-            const spec = await response.json();
-            statusNode.textContent = 'Docs loaded.';
-            window.ui = SwaggerUIBundle({{
-                spec,
-                dom_id: '#swagger-ui',
-                deepLinking: true,
-                presets: [SwaggerUIBundle.presets.apis],
-                requestInterceptor: (request) => {{
-                    request.headers = request.headers || {{}};
-                    request.headers.Authorization = `Bearer ${{token}}`;
-                    return request;
-                }},
-            }});
-        }}
-
-        loadButton.addEventListener('click', () => {{
-            loadDocs().catch((error) => {{
-                statusNode.textContent = `Failed to load docs: ${{error}}`;
-            }});
-        }});
-    </script>
-</body>
-</html>
-"""
+    required_role = escape(settings.docs_required_role or "any authenticated user")
+    test_auth_enabled = settings.enable_test_auth_endpoints
+    return (
+        _load_docs_template()
+        .replace("__APP_TITLE__", escape(app.title))
+        .replace("__REQUIRED_ROLE__", required_role)
+        .replace(
+            "__TEST_AUTH_SECTION_CLASS__",
+            "" if test_auth_enabled else "hidden",
+        )
+        .replace(
+            "__TEST_AUTH_STATUS__",
+            "Use a Firebase test account to fetch a token automatically."
+            if test_auth_enabled
+            else "Test auth endpoint is disabled for this environment.",
+        )
+    )
 
 
 @auth_router.post("/token", response_model=Token, summary="Obtain an access token")

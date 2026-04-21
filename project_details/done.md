@@ -62,6 +62,7 @@
 - Protected /openapi.json with the same Firebase bearer-token flow and an Admin-role gate.
 - Replaced the default public /docs route with a token-entry shell that uses the caller's Firebase ID token to load protected OpenAPI docs and authorize Swagger requests.
 - Added a Firebase bootstrap script and created one test user per role: Monitor, Supervisor, and Admin.
+- Moved the custom docs shell into a dedicated template file and added a built-in test sign-in form that calls /auth/test/token when test auth helpers are enabled.
 
 ## Notes
 

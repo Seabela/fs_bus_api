@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>__APP_TITLE__ Docs</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #f3f7f4, #dce9df);
+            color: #17301f;
+        }
+        .docs-shell {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .gate-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            margin-bottom: 20px;
+        }
+        .gate {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #b7cabd;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 14px 30px rgba(23, 48, 31, 0.08);
+        }
+        .gate h1,
+        .gate h2 {
+            margin-top: 0;
+        }
+        .gate h1 {
+            font-size: 1.7rem;
+        }
+        .gate h2 {
+            font-size: 1.1rem;
+        }
+        .gate p {
+            margin: 0 0 12px;
+            line-height: 1.5;
+        }
+        .gate label {
+            display: block;
+            font-weight: 600;
+            margin: 12px 0 8px;
+        }
+        .gate input,
+        .gate textarea {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #8ea795;
+            padding: 12px;
+            font: inherit;
+            box-sizing: border-box;
+        }
+        .gate textarea {
+            min-height: 110px;
+        }
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .gate button {
+            border: 0;
+            border-radius: 999px;
+            padding: 12px 18px;
+            background: #17301f;
+            color: #fff;
+            font: inherit;
+            cursor: pointer;
+        }
+        .gate button.secondary {
+            background: #385445;
+        }
+        .gate code {
+            background: #eef4ef;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .helper {
+            color: #4d6657;
+            font-size: 0.95rem;
+        }
+        #status,
+        #sign-in-status {
+            margin-top: 10px;
+            min-height: 24px;
+            font-weight: 600;
+        }
+        #swagger-ui {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 14px 30px rgba(23, 48, 31, 0.08);
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="docs-shell">
+        <div class="gate-grid">
+            <section class="gate">
+                <h1>__APP_TITLE__ API Docs</h1>
+                <p>OpenAPI access is protected by the same Firebase bearer-token flow as the API.</p>
+                <p>Minimum role: <code>__REQUIRED_ROLE__</code>.</p>
+                <p class="helper">The docs page is served by the same FastAPI app and Cloud Run service as the API.</p>
+            </section>
+
+            <section class="gate __TEST_AUTH_SECTION_CLASS__">
+                <h2>Test Sign-In</h2>
+                <p>Use the test-only token helper endpoint to exchange Firebase email/password credentials for an ID token.</p>
+                <label for="email">Email</label>
+                <input id="email" type="email" placeholder="admin.test@fsbus.example.com" />
+                <label for="password">Password</label>
+                <input id="password" type="password" placeholder="Enter password" />
+                <div class="button-row">
+                    <button id="sign-in" type="button">Sign In For Testing</button>
+                </div>
+                <div id="sign-in-status">__TEST_AUTH_STATUS__</div>
+            </section>
+        </div>
+
+        <section class="gate">
+            <h2>Token</h2>
+            <p>You can paste a Firebase ID token here directly, or use the test sign-in form above when enabled.</p>
+            <label for="token">Firebase ID token</label>
+            <textarea id="token" placeholder="Paste a Firebase ID token here"></textarea>
+            <div class="button-row">
+                <button id="load-docs" type="button">Load Protected Docs</button>
+                <button id="clear-token" type="button" class="secondary">Clear Token</button>
+            </div>
+            <div id="status"></div>
+        </section>
+
+        <div id="swagger-ui"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+        const tokenInput = document.getElementById('token');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const statusNode = document.getElementById('status');
+        const signInStatusNode = document.getElementById('sign-in-status');
+        const loadButton = document.getElementById('load-docs');
+        const clearButton = document.getElementById('clear-token');
+        const signInButton = document.getElementById('sign-in');
+
+        async function loadDocs() {
+            const token = tokenInput.value.trim();
+            if (!token) {
+                statusNode.textContent = 'A Firebase ID token is required.';
+                return;
+            }
+
+            statusNode.textContent = 'Loading protected OpenAPI schema...';
+            const response = await fetch('/openapi.json', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!response.ok) {
+                const body = await response.text();
+                statusNode.textContent = `Schema request failed: ${response.status} ${body}`;
+                return;
+            }
+
+            const spec = await response.json();
+            statusNode.textContent = 'Docs loaded.';
+            window.ui = SwaggerUIBundle({
+                spec,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [SwaggerUIBundle.presets.apis],
+                requestInterceptor: (request) => {
+                    request.headers = request.headers || {};
+                    request.headers.Authorization = `Bearer ${token}`;
+                    return request;
+                },
+            });
+        }
+
+        async function signInForTesting() {
+            const email = emailInput?.value.trim() || '';
+            const password = passwordInput?.value || '';
+
+            if (!email || !password) {
+                signInStatusNode.textContent = 'Email and password are required.';
+                return;
+            }
+
+            signInStatusNode.textContent = 'Requesting Firebase test token...';
+            const response = await fetch('/auth/test/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const body = await response.text();
+            let data = null;
+            try {
+                data = JSON.parse(body);
+            } catch (error) {
+                data = null;
+            }
+
+            if (!response.ok) {
+                const detail = data && data.detail ? data.detail : body;
+                signInStatusNode.textContent = `Sign-in failed: ${response.status} ${detail}`;
+                return;
+            }
+
+            tokenInput.value = data.id_token || '';
+            signInStatusNode.textContent = `Signed in as ${data.email || email}. Loading docs...`;
+            await loadDocs();
+        }
+
+        if (signInButton) {
+            signInButton.addEventListener('click', () => {
+                signInForTesting().catch((error) => {
+                    signInStatusNode.textContent = `Failed to sign in: ${error}`;
+                });
+            });
+        }
+
+        loadButton.addEventListener('click', () => {
+            loadDocs().catch((error) => {
+                statusNode.textContent = `Failed to load docs: ${error}`;
+            });
+        });
+
+        clearButton.addEventListener('click', () => {
+            tokenInput.value = '';
+            statusNode.textContent = 'Token cleared.';
+        });
+    </script>
+</body>
+</html>

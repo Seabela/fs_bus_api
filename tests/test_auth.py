@@ -114,6 +114,14 @@ class AuthTests(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json()["detail"], "Could not validate credentials")
 
+    def test_docs_shell_contains_test_sign_in_form(self):
+        response = client.get("/docs")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Test Sign-In", response.text)
+        self.assertIn("/auth/test/token", response.text)
+        self.assertIn("Load Protected Docs", response.text)
+
     def test_openapi_respects_docs_role(self):
         payload = {
             "uid": "user-123",
@@ -205,6 +213,16 @@ class AuthTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["detail"], "Test auth endpoints are disabled.")
+
+    def test_docs_shell_hides_test_sign_in_when_disabled(self):
+        settings = Settings(enable_test_auth_endpoints=False)
+        app.dependency_overrides[get_settings] = lambda: settings
+
+        response = client.get("/docs")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Test auth endpoint is disabled for this environment.", response.text)
+        self.assertIn('class="gate hidden"', response.text)
 
     def test_me_requires_bearer_token(self):
         response = client.get("/me")
