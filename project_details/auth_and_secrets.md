@@ -78,5 +78,6 @@ If a CI workflow truly needs a secret value during execution, fetch it from Goog
 
 - Workload Identity Federation is configured.
 - GitHub deployment variables are the intended CI/CD config source.
+- Redundant GitHub deployment secrets were removed after variables were configured.
 - Secret Manager is the intended runtime secret source.
 - Application auth is still placeholder-level and must be replaced with real OAuth2 user authentication.

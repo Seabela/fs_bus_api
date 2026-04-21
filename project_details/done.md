@@ -21,7 +21,7 @@
 - Required GCP APIs enabled for compute, Cloud SQL, Secret Manager, Cloud Run, Artifact Registry, IAM, Resource Manager, and Service Networking.
 - Service accounts provisioned: fs-bus-api-runtime and fs-bus-cicd.
 - IAM role bindings applied for runtime and CI/CD service accounts.
-- Cloud SQL PostgreSQL instance provisioned: fs-bus-db (POSTGRES_16) in africa-south1.
+- Cloud SQL PostgreSQL instance provisioned in africa-south1 and upgraded to POSTGRES_17.
 - Application database created: fs_bus_api.
 - Application database user created: fs_bus_user.
 - Secret Manager secret containers created and initialized: api-secret-key, db-password, db-name, db-user.
@@ -38,6 +38,7 @@
 - Artifact Registry repository bus-track-mcomm verified in africa-south1.
 - GitHub Workload Identity Pool and Provider created for macrocomm-dev/fs_bus_api.
 - Workload identity binding applied to fs-bus-cicd for GitHub Actions OIDC.
+- GitHub deployment configuration moved to repository variables and redundant GitHub secrets were removed.
 - Temporary manual token-creator grant used for smoke testing was removed after validation.
 - Application startup failure on Cloud Run fixed by moving CORS middleware registration out of startup lifecycle.
 - Current workspace image built, pushed to Artifact Registry, and deployed to Cloud Run successfully.

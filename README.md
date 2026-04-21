@@ -104,7 +104,7 @@ The workflow in `.github/workflows/deploy.yml` triggers on every push to `main`:
 2. **Build & Push** — builds the Docker image and pushes to Artifact Registry
 3. **Deploy** — deploys to Cloud Run with Cloud SQL and Secret Manager wired in
 
-### Required GitHub Actions secrets
+### Required GitHub Actions variables
 
 | Secret | Description |
 |--------|-------------|

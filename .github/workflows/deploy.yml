@@ -6,7 +6,6 @@
 #   2. Builds Docker image and pushes to Artifact Registry
 #   3. Deploys to Cloud Run
 #
-# Required GitHub Actions secrets:
 # Required GitHub Actions variables:
 #   GCP_PROJECT_ID         — GCloud project ID (e.g. bus-track-480813)
 #   GCP_REGION             — Cloud Run / Artifact Registry region (e.g. africa-south1)
