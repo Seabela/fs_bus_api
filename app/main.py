@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import (
     Token,
-    create_access_token,
+    expand_role_permissions,
     get_current_user,
     TokenData,
 )
@@ -58,30 +58,18 @@ def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     settings: Annotated[Settings, Depends(get_settings)],
 ):
-    """Exchange credentials for a JWT Bearer token.
+    """Placeholder endpoint retained only for explicit non-support messaging.
 
-    **Note:** This endpoint is a development convenience.  Replace the stub
-    user-lookup below with a real database query and password verification
-    before deploying to production.
-
-    In production, tokens may also be issued by an external OAuth2 identity
-    provider; this API validates them via the ``Authorization: Bearer`` scheme.
+    Production login is expected to happen through the configured identity
+    provider rather than this API endpoint.
     """
-    # TODO: look up the user in the database and verify credentials.
-    # Example:
-    #   user = db.query(User).filter(User.username == form_data.username).first()
-    #   if not user or not verify_password(form_data.password, user.hashed_password):
-    #       raise HTTPException(status_code=400, detail="Incorrect username or password")
     raise HTTPException(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
         detail=(
-            "User authentication is not yet configured. "
-            "Implement user lookup in app/main.py login()."
+            "Login is not handled by this API. "
+            "Authenticate through the configured identity provider and call the API with a Bearer token."
         ),
     )
-    # Once user lookup is implemented, replace the raise above with:
-    # access_token = create_access_token(data={"sub": user.username}, settings=settings)
-    # return Token(access_token=access_token, token_type="bearer")
 
 
 app.include_router(auth_router)
@@ -107,4 +95,10 @@ def read_current_user(
     current_user: Annotated[TokenData, Depends(get_current_user)],
 ):
     """Return the identity of the currently authenticated caller."""
-    return {"sub": current_user.sub}
+    return {
+        "sub": current_user.sub,
+        "name": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role,
+        "permissions": list(expand_role_permissions(current_user.role)),
+    }

@@ -51,6 +51,14 @@
 - Secret Manager latest-version access validated for api-secret-key, db-password, db-name, and db-user.
 - Direct external PostgreSQL connection probe from local environment timed out against the instance public IP, so DB-backed application behavior is not yet fully validated end-to-end.
 
+## Auth implementation started
+
+- API bearer-token validation switched from local placeholder JWT decoding to Firebase token verification.
+- Firebase configuration fields added to application settings and local environment template.
+- Current authenticated user response expanded to expose sub, name, email, role, and derived permissions.
+- Role hierarchy modeled in code for Monitor, Supervisor, and Admin, including inherited capabilities.
+- Focused automated tests added for auth helpers and the /me protected route.
+
 ## Notes
 
 - Items in this file represent work already present in the repository baseline.

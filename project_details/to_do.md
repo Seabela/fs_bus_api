@@ -12,12 +12,11 @@
 ## Auth and security
 
 - Configure Firebase Authentication as the identity provider for the API and mobile app.
-- Implement provider-token validation in the API instead of local placeholder token issuing.
 - Define issuer, audience, token lifetime, refresh strategy, and revocation behavior for production.
-- Define the token claim contract required by the mobile app, including name, id, and role.
-- Model role-based access control for Monitor, Supervisor, and Admin, including inherited capabilities.
 - Implement administrator-managed user provisioning with no public signup functionality.
 - Define generic login failure responses and session expiry behavior aligned to the 4-hour requirement.
+- Apply role enforcement dependencies to business routes as they are implemented.
+- Remove remaining legacy local-JWT fallback settings and helper paths once Firebase-only auth is fully adopted.
 
 ## Data and API surface
 
@@ -31,7 +30,7 @@
 
 ## CI/CD and reliability
 
-- Add automated tests for authentication, health, and core API routes.
+- Expand automated tests beyond auth to health and core API routes.
 - Add integration testing path against a test database.
 - Run a post-deploy smoke test against a DB-backed route or migration path, not only health/auth placeholder routes.
 

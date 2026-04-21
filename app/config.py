@@ -76,6 +76,11 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    # Firebase Authentication
+    firebase_project_id: str = "bus-track-480813"
+    firebase_check_revoked: bool = False
+    firebase_clock_skew_seconds: int = 30
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
