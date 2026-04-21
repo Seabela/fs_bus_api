@@ -13,6 +13,8 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings
 
+from app.firebase_identity import DEFAULT_FIREBASE_WEB_API_KEY
+
 
 # ---------------------------------------------------------------------------
 # Secret Manager helper
@@ -78,8 +80,11 @@ class Settings(BaseSettings):
 
     # Firebase Authentication
     firebase_project_id: str = "bus-track-480813"
+    firebase_web_api_key: str = DEFAULT_FIREBASE_WEB_API_KEY
     firebase_check_revoked: bool = False
     firebase_clock_skew_seconds: int = 30
+    enable_test_auth_endpoints: bool = True
+    docs_required_role: str = "Admin"
 
     class Config:
         env_file = ".env"

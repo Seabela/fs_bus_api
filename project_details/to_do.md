@@ -11,9 +11,8 @@
 
 ## Auth and security
 
-- Configure Firebase Authentication as the identity provider for the API and mobile app.
 - Define issuer, audience, token lifetime, refresh strategy, and revocation behavior for production.
-- Implement administrator-managed user provisioning with no public signup functionality.
+- Replace temporary Firebase role test users with formal administrator-managed user provisioning and lifecycle controls.
 - Define generic login failure responses and session expiry behavior aligned to the 4-hour requirement.
 - Apply role enforcement dependencies to business routes as they are implemented.
 - Remove remaining legacy local-JWT fallback settings and helper paths once Firebase-only auth is fully adopted.

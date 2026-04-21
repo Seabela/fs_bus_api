@@ -58,6 +58,10 @@
 - Current authenticated user response expanded to expose sub, name, email, role, and derived permissions.
 - Role hierarchy modeled in code for Monitor, Supervisor, and Admin, including inherited capabilities.
 - Focused automated tests added for auth helpers and the /me protected route.
+- Added /auth/test/whoami as a simple Firebase bearer-token validation endpoint that returns the authenticated user details.
+- Protected /openapi.json with the same Firebase bearer-token flow and an Admin-role gate.
+- Replaced the default public /docs route with a token-entry shell that uses the caller's Firebase ID token to load protected OpenAPI docs and authorize Swagger requests.
+- Added a Firebase bootstrap script and created one test user per role: Monitor, Supervisor, and Admin.
 
 ## Notes
 

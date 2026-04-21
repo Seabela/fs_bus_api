@@ -67,7 +67,10 @@ The script will:
 - Start the Cloud SQL Auth Proxy (if `cloud-sql-proxy` is on your `PATH`)
 - Launch the API at <http://127.0.0.1:8000>
 
-Interactive docs: <http://127.0.0.1:8000/docs>
+Interactive docs shell: <http://127.0.0.1:8000/docs>
+
+The docs shell prompts for a Firebase ID token and uses that same bearer token
+to fetch the protected OpenAPI schema and authorize "Try it out" requests.
 
 ### 3b — Docker Compose stack
 
@@ -82,17 +85,44 @@ The API is available at <http://localhost:8000>.
 
 ## Authentication
 
-All API calls (except `/health` and `/docs`) require an `Authorization: Bearer <token>` header.
+Firebase Authentication is now the identity provider for API bearer-token validation.
 
-Tokens are signed JWTs (HS256).  Obtain one from the `/auth/token` endpoint:
+- Protected API routes require `Authorization: Bearer <firebase-id-token>`.
+- `/auth/token` remains a deliberate `501` placeholder and does not issue credentials.
+- The mobile app should obtain its Firebase ID token from Firebase Auth itself, typically through the Firebase client SDK or Firebase Auth REST API, not from this backend.
+- `/auth/test/whoami` and `/me` are the simplest endpoints to validate that a Firebase ID token is being accepted by the API.
+- `/auth/test/token` is a temporary backend proxy that exchanges email/password for a Firebase ID token for smoke testing only.
+- `/openapi.json` is protected by the same bearer-token flow and defaults to `Admin` access via `DOCS_REQUIRED_ROLE`.
+- `/docs` is a token-entry shell that uses the same Firebase ID token to fetch `/openapi.json` and authorize Swagger requests.
 
-```bash
-curl -X POST http://localhost:8000/auth/token \
-  -d "username=<user>&password=<password>"
+Direct Firebase sign-in endpoint used by clients:
+
+```text
+https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=<FIREBASE_WEB_API_KEY>
 ```
 
-In production, tokens should be issued by the configured identity provider
-and validated by this API's Bearer scheme.
+Helper script for direct Firebase sign-in:
+
+```bash
+/home/erlo/fs_bus_api/.venv/bin/python scripts/get_firebase_test_token.py \
+  admin.test@fsbus.example.com \
+  '<password>'
+```
+
+Temporary backend proxy for smoke testing:
+
+```bash
+curl -X POST http://localhost:8000/auth/test/token \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin.test@fsbus.example.com","password":"<password>"}'
+```
+
+Example protected call:
+
+```bash
+curl http://localhost:8000/auth/test/whoami \
+  -H "Authorization: Bearer <firebase-id-token>"
+```
 
 ---
 
@@ -134,8 +164,11 @@ See `.env.example` for the full list.  Key variables:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `GOOGLE_CLOUD_PROJECT` | `bus-track-480813` | GCloud project |
+| `FIREBASE_WEB_API_KEY` | `AIzaSyDh21k62KCpURRdmM_zQXozBtJJQ3HHxhA` | Public Firebase client API key used for token exchange |
 | `CLOUD_SQL_INSTANCE` | `bus-track-480813:africa-south1:fs-bus-db` | Cloud SQL connection name |
 | `DB_HOST` | `127.0.0.1` | DB host (proxy address) |
 | `DB_PORT` | `5432` | DB port |
-| `SECRET_KEY` | *(from Secret Manager)* | JWT signing key |
+| `SECRET_KEY` | *(from Secret Manager)* | Legacy local JWT helper secret |
+| `ENABLE_TEST_AUTH_ENDPOINTS` | `true` | Enables the temporary `/auth/test/token` backend proxy |
+| `DOCS_REQUIRED_ROLE` | `Admin` | Minimum Firebase role allowed to fetch `/openapi.json` |
 | `API_PORT` | `8000` | Port for `start.sh` |
