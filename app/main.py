@@ -34,16 +34,13 @@ def _get_cors_origins(settings: Settings) -> list[str]:
     return [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 
 
-@app.on_event("startup")
-def configure_cors() -> None:
-    settings = get_settings()
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=_get_cors_origins(settings),
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_get_cors_origins(get_settings()),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # ---------------------------------------------------------------------------

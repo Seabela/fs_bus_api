@@ -10,6 +10,7 @@ The assistant must always use these files as first-class references:
 
 - project_details/overview.md
 - project_details/architecture.md
+- project_details/auth_and_secrets.md
 - project_details/to_do.md
 - project_details/done.md
 - project_details/scope/FreeStateBusApp_BusinessSpec_v2 - Sean Markup.docx

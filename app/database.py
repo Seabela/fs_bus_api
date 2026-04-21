@@ -7,13 +7,23 @@ The connection string is built from settings so it works both locally
 
 from __future__ import annotations
 
-from sqlalchemy import create_engine, text
+from urllib.parse import quote_plus
+
+from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import get_settings
 
 
 def _build_url(settings) -> str:
+    # Cloud Run + Cloud SQL commonly use a Unix socket path like
+    # /cloudsql/<project>:<region>:<instance>. Build that DSN accordingly.
+    if settings.db_host.startswith("/cloudsql/"):
+        return (
+            f"postgresql+psycopg2://{settings.db_user}:{settings.db_password}"
+            f"@/{settings.db_name}?host={quote_plus(settings.db_host)}"
+        )
+
     return (
         f"postgresql+psycopg2://{settings.db_user}:{settings.db_password}"
         f"@{settings.db_host}:{settings.db_port}/{settings.db_name}"

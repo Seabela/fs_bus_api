@@ -28,8 +28,8 @@ if [[ -f ".env" ]]; then
     set +o allexport
 fi
 
-GOOGLE_CLOUD_PROJECT="${GOOGLE_CLOUD_PROJECT:-bus_track}"
-CLOUD_SQL_INSTANCE="${CLOUD_SQL_INSTANCE:-bus_track:us-central1:fs-bus-db}"
+GOOGLE_CLOUD_PROJECT="${GOOGLE_CLOUD_PROJECT:-bus-track-480813}"
+CLOUD_SQL_INSTANCE="${CLOUD_SQL_INSTANCE:-bus-track-480813:africa-south1:fs-bus-db}"
 DB_HOST="${DB_HOST:-127.0.0.1}"
 DB_PORT="${DB_PORT:-5432}"
 API_PORT="${API_PORT:-8000}"

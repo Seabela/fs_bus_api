@@ -2,14 +2,10 @@
 
 ## Platform and cloud wiring
 
-- Set Google Cloud project configuration to bus-track-480813 across runtime, docs, and deployment.
-- Provision PostgreSQL Cloud SQL instance for the API.
-- Finalize Cloud SQL connection strategy for local development and Cloud Run deployment.
-- Configure required IAM roles for API runtime, CI/CD deploy identity, and assistant DB access.
+- Validate a DB-backed application path end-to-end against Cloud Run.
 
 ## Secrets and configuration
 
-- Create and verify required Secret Manager secrets for API auth and database credentials.
 - Validate secret loading behavior in local, CI, and Cloud Run environments.
 
 ## Auth and security
@@ -27,9 +23,10 @@
 
 ## CI/CD and reliability
 
-- Verify GitHub Actions secrets and deployment values for bus-track-480813.
+- Add GitHub repository secrets for WIF_PROVIDER and WIF_SERVICE_ACCOUNT.
 - Add automated tests for authentication, health, and core API routes.
 - Add integration testing path against a test database.
+- Run a post-deploy smoke test against a DB-backed route or migration path, not only health/auth placeholder routes.
 
 ## Documentation and governance
 

@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     """
 
     app_name: str = "FS Bus API"
-    google_cloud_project: str = "bus_track"
+    google_cloud_project: str = "bus-track-480813"
 
     # Database (CloudSQL / PostgreSQL)
     db_host: str = "127.0.0.1"

@@ -1,7 +1,7 @@
 # FS Bus API
 
 FastAPI service for capturing data for the FS bus tracking application.
-The database (PostgreSQL) lives in the `bus_track` GCloud project (Cloud SQL).
+The database (PostgreSQL) lives in the `bus-track-480813` GCloud project (Cloud SQL).
 
 ---
 
@@ -108,9 +108,10 @@ The workflow in `.github/workflows/deploy.yml` triggers on every push to `main`:
 
 | Secret | Description |
 |--------|-------------|
-| `GCP_SA_KEY` | Service account key JSON |
-| `GCP_PROJECT_ID` | GCloud project ID (e.g. `bus_track`) |
-| `GCP_REGION` | Region (e.g. `us-central1`) |
+| `WIF_PROVIDER` | Workload Identity Provider resource name |
+| `WIF_SERVICE_ACCOUNT` | CI service account email |
+| `GCP_PROJECT_ID` | GCloud project ID (e.g. `bus-track-480813`) |
+| `GCP_REGION` | Region (e.g. `africa-south1`) |
 | `CLOUD_SQL_INSTANCE` | Connection name (`<project>:<region>:<instance>`) |
 | `ARTIFACT_REGISTRY_REPO` | Artifact Registry repo name |
 | `CLOUD_RUN_SERVICE` | Cloud Run service name |
@@ -132,8 +133,8 @@ See `.env.example` for the full list.  Key variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GOOGLE_CLOUD_PROJECT` | `bus_track` | GCloud project |
-| `CLOUD_SQL_INSTANCE` | `bus_track:us-central1:fs-bus-db` | Cloud SQL connection name |
+| `GOOGLE_CLOUD_PROJECT` | `bus-track-480813` | GCloud project |
+| `CLOUD_SQL_INSTANCE` | `bus-track-480813:africa-south1:fs-bus-db` | Cloud SQL connection name |
 | `DB_HOST` | `127.0.0.1` | DB host (proxy address) |
 | `DB_PORT` | `5432` | DB port |
 | `SECRET_KEY` | *(from Secret Manager)* | JWT signing key |
