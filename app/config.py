@@ -20,6 +20,7 @@ from app.firebase_identity import DEFAULT_FIREBASE_WEB_API_KEY
 # Secret Manager helper
 # ---------------------------------------------------------------------------
 
+
 def _fetch_secret(project_id: str, secret_id: str) -> str | None:
     """Fetch the latest version of *secret_id* from GCloud Secret Manager.
 
@@ -37,7 +38,7 @@ def _fetch_secret(project_id: str, secret_id: str) -> str | None:
         client = secretmanager.SecretManagerServiceClient()
         name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
         response = client.access_secret_version(request={"name": name})
-        return response.payload.data.decode("UTF-8")
+        return response.payload.data.decode("UTF-8").strip()
     except (
         Exception  # noqa: BLE001 — narrowed below via isinstance checks in callers
     ) as exc:
@@ -54,6 +55,7 @@ def _fetch_secret(project_id: str, secret_id: str) -> str | None:
 # ---------------------------------------------------------------------------
 # Settings
 # ---------------------------------------------------------------------------
+
 
 class Settings(BaseSettings):
     """Application settings.
@@ -89,6 +91,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
     # API CORS — comma-separated list of allowed origins.
     # Set to "*" to allow all origins (development only).
